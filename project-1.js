@@ -3,7 +3,6 @@
 
 // Require https module
 const https = require('https');
-const username = 'chalkers';
 
 // Function to print message to console
 function printMessage(username, badgeCount, points) {
@@ -11,19 +10,22 @@ function printMessage(username, badgeCount, points) {
   console.log(message);
 }
 
+function getProfile(username) {
+  // Connect to the API URL (https://teamtreehouse.com/username.json)
+  const request = https.get(`https://teamtreehouse.com/${username}.json`, response => {
+    let body = '';
+    response.on('data', data => {
+      // Read the data
+      body += data.toString();
+    });
+    response.on('end', () => {
+      // Parse the data
+      const profile = JSON.parse(body);
+      // Print the data
+      printMessage(username, profile.badges.length, profile.points.JavaScript);
+    });
+  })
+}
 
-// Connect to the API URL (https://teamtreehouse.com/username.json)
-const request = https.get(`https://teamtreehouse.com/${username}.json`, response => {
-  let body = '';
-  response.on('data', data => {
-    // Read the data
-    body += data.toString();
-  });
-  response.on('end', () => {
-    // Parse the data
-    const profile = JSON.parse(body);
-    printMessage(username, profile.badges.length, profile.points.JavaScript);
-    // Print the data
-    // console.log(profile.points.total);
-  });
-})
+const users = process.argv.slice(2);
+users.forEach(getProfile);
